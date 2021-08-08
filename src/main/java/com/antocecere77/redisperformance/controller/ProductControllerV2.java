@@ -20,8 +20,8 @@ public class ProductControllerV2 {
     }
 
     @PutMapping("{id}")
-    public Mono<Product> updateProduct(@PathVariable int id, @RequestBody Mono<Product> productMono) {
-        return productService.updateProduct(id, productMono);
+    public Mono<Product> updateProduct(@PathVariable int id, @RequestBody Product product) {
+        return productService.updateProduct(id, Mono.just(product));
     }
 
     @DeleteMapping("{id}")
