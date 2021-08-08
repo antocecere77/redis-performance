@@ -9,7 +9,7 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("/product/v1")
 @RequiredArgsConstructor
-public class ProductController {
+public class ProductControllerV1 {
 
     private final ProductServiceV1 productService;
 
