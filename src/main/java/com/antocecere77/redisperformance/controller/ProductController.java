@@ -1,17 +1,17 @@
 package com.antocecere77.redisperformance.controller;
 
 import com.antocecere77.redisperformance.entity.Product;
-import com.antocecere77.redisperformance.service.ProductService;
+import com.antocecere77.redisperformance.service.ProductServiceV1;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 @RestController
-@RequestMapping("/product")
+@RequestMapping("/product/v1")
 @RequiredArgsConstructor
 public class ProductController {
 
-    private final ProductService productService;
+    private final ProductServiceV1 productService;
 
     @GetMapping("{id}")
     public Mono<Product> getProduct(@PathVariable int id) {
