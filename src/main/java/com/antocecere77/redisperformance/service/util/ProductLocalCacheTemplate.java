@@ -11,12 +11,10 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 @Service
-@RequiredArgsConstructor
 public class ProductLocalCacheTemplate extends CacheTemplate<Integer, Product> {
 
     @Autowired
     private ProductRepository productRepository;
-
     private RLocalCachedMap<Integer, Product> map;
 
     public ProductLocalCacheTemplate(RedissonClient client) {
@@ -33,7 +31,7 @@ public class ProductLocalCacheTemplate extends CacheTemplate<Integer, Product> {
 
     @Override
     protected Mono<Product> getFromCache(Integer id) {
-        return Mono.just(this.map.get(id));
+        return Mono.justOrEmpty(this.map.get(id));
     }
 
     @Override
@@ -46,12 +44,12 @@ public class ProductLocalCacheTemplate extends CacheTemplate<Integer, Product> {
     @Override
     protected Mono<Product> updateCache(Integer id, Product product) {
         return Mono.create(sink ->
-            this.map.fastPutAsync(id, product)
-                    .thenAccept(b -> sink.success(product))
-                    .exceptionally(ex -> {
-                        sink.error(ex);
-                        return null;
-                    })
+                this.map.fastPutAsync(id, product)
+                        .thenAccept(b -> sink.success(product))
+                        .exceptionally(ex -> {
+                            sink.error(ex);
+                            return null;
+                        })
         );
     }
 
