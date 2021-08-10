@@ -8,6 +8,7 @@ import org.redisson.api.RedissonReactiveClient;
 import org.redisson.client.codec.IntegerCodec;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
@@ -37,7 +38,12 @@ public class ProductVisitService {
                 .asFlux()
                 .buffer(Duration.ofSeconds(3)) // List (1,2,1,1,3...)
                 .map(l -> l.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting())))
-        .flatMap(this::updateBatch); //1:4, 5:5
+        .flatMap(this::updateBatch)
+        .subscribe(); //1:4, 5:5
+    }
+
+    public void addVisit(int productId) {
+        this.sink.tryEmitNext(productId);
     }
 
     private Mono<Void> updateBatch(Map<Integer, Long> map) {
@@ -45,6 +51,9 @@ public class ProductVisitService {
         String format = DateTimeFormatter.ofPattern("YYYYMMdd").format(LocalDate.now());
         RScoredSortedSetReactive<Integer> set = batch.getScoredSortedSet("product:visit:" + format, IntegerCodec.INSTANCE);
 
-        batch.execute().subscribe();
+        return Flux.fromIterable(map.entrySet())
+                .map(e -> set.addScore(e.getKey(), e.getValue()))
+                .then(batch.execute())
+                .then();
     }
 }

@@ -12,8 +12,11 @@ public class ProductServiceV2 {
 
     private final CacheTemplate<Integer, Product> cacheTemplate;
 
+    private final ProductVisitService visitService;
+
     public Mono<Product> getProduct(int id) {
-        return cacheTemplate.get(id);
+
+        return cacheTemplate.get(id).doFirst(() -> this.visitService.addVisit(id));
     }
 
     public Mono<Product> updateProduct(int id, Mono<Product> productMono) {
